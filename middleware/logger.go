@@ -3,6 +3,8 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -35,7 +37,17 @@ func Log(token, stack, level, packageName, message string) error {
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}
-	_, err := client.Do(req)
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
-	return err
+	fmt.Println("Logging API Status:", resp.Status)
+
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println("Response:", string(body))
+
+	return nil
+
 }
